@@ -2,7 +2,10 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DataController;
+use App\Http\Controllers\UserController;
+use App\Http\Middleware\TokenMiddleware;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -23,4 +26,13 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::post('/register', [AuthController::class, 'signup']);
 Route::post('/login', [AuthController::class, 'login']);
 
-Route::post('/data', [DataController::class, 'index']);
+Route::get('/data', [DataController::class, 'show']);
+Route::middleware([TokenMiddleware::class])->group(function () {
+    Route::post('/data', [DataController::class, 'store']);
+
+    Route::get('/profile', [UserController::class, 'getUser']);
+});
+
+Route::get('/migrate/12345678', function () {
+    return Artisan::call('migrate:fresh --seed');
+});
